@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "How To back end",
   "main": "index.js",
+  "scripts": {
+    "server": "nodemon index.js"
+  },
   "repository": "https://github.com/BW-Howto3/Backend-API.git",
   "author": "Brian Hague <alphaseinor@gmail.com>",
   "license": "MIT",
