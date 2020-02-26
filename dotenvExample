@@ -1,0 +1,5 @@
+DB_HOST=mysql.someserver.com
+DB_PORT=3306
+DB_USER=dbusername
+DB_PASS=someR@nd0mStuff
+DB_NAME=howto_buildweek
