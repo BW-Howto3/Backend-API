@@ -22,7 +22,11 @@ router.post('/login', validateMe, (req, res) => {
        .first()
        .then(user => {
          if(user && bcrypt.compareSync(req.body.password, user.password)){
-           res.status(200).json({message: `Welcome ${req.body.username}`, token: assignToken(user)})
+           res.status(200).json({
+             message: `Welcome ${req.body.username}`, 
+             token: assignToken(user),
+             user_id: user.id
+            })
          } else {
            res.status(400).json({error: "invalid username or password"})  
          }
