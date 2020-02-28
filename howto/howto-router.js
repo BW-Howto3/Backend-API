@@ -33,8 +33,19 @@ router.post('/', (req, res) => {
   res.status(200).json({message:req.body})
 })
 
+router.post('/:id/steps', (req, res) => {
+  res.status(200).json({message:req.body, post_id:req.params.id})
+})
+
+router.put('/:id/steps', (req, res) => {
+  res.status(200).json({message:req.body, post_id:req.params.id})
+})
+
 router.post('/:id', (req, res) => {
-  console.log(req.query)
+  res.status(200).json({message:req.body, post_id:req.params.id})
+})
+
+router.put('/:id', (req, res) => {
   res.status(200).json({message:req.body, post_id:req.params.id})
 })
 
