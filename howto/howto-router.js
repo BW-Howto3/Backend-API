@@ -33,9 +33,28 @@ router.post('/', (req, res) => {
   res.status(200).json({message:req.body})
 })
 
-router.post('/:id', (req, res) => {
-  console.log(req.query)
+router.post('/:id/steps', (req, res) => {
   res.status(200).json({message:req.body, post_id:req.params.id})
+})
+
+router.put('/:id/steps', (req, res) => {
+  res.status(200).json({message:req.body, post_id:req.params.id})
+})
+
+router.delete('/:id/steps', (req, res) => {
+  res.status(200).json({deleted_step: req.params.id})
+})
+
+router.post('/:id', (req, res) => {
+  res.status(200).json({message:req.body, post_id:req.params.id})
+})
+
+router.put('/:id', (req, res) => {
+  res.status(200).json({message:req.body, post_id:req.params.id})
+})
+
+router.delete('/:id', (req, res) => {
+  res.status(200).json({deleted_howto:req.params.id})
 })
 
 router.post('')
