@@ -4,6 +4,7 @@
   "description": "How To back end",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "server": "nodemon index.js"
   },
   "repository": "https://github.com/BW-Howto3/Backend-API.git",
