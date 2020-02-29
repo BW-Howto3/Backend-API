@@ -46,7 +46,7 @@ router.get('/:id', howtoIdExists, attachUsername, attachSteps, (req, res) => {
   res.status(200).json(req.data)
 })
 
-router.post('/', (req, res) => {
+router.post('/', checkHowtoBody, (req, res) => {
   res.status(200).json({message:req.body})
 })
 
@@ -79,6 +79,28 @@ router.delete('/:id', howtoIdExists, DeleteIt, (req, res) => {
 
 //middleware
 
+function checkHowtoBody(req,res,next) {
+  console.log(typeof(req.body.user_id))
+  //check to see if user_id is a number  
+  if(typeof(req.body.user_id) === "number"){
+    console.log("user_id is a number")
+    if(typeof(req.body.name) === "string"){
+      console.log("name is a string")
+      if(typeof(req.body.description) === "string"){
+        console.log("description is a string")
+        req.data={...req.data, active: 1}
+        next()
+      }else{
+        res.status(401).json({error: "description must be a string"})  
+      }
+    }else{
+      res.status(401).json({error: "name must be a string"})  
+    }
+  }else{
+    res.status(401).json({error: "user_id must be a number"})
+  }
+}
+
 function attachSteps(req,res,next) {
   howtoDB.findStepBy(req.data.id)
   .then(steps => {
@@ -96,7 +118,7 @@ function attachSteps(req,res,next) {
 function attachUsername(req,res,next) {
   userDB.findUserById(req.data.user_id)
     .then(name => {
-      //console.log("username", name[0].username)
+      console.log("username", name[0].username)
       req.data = {...req.data, username: name[0].username}
     })
     .catch(error => {
