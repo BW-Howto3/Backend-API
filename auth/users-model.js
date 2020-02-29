@@ -15,5 +15,6 @@ function findUserByUserName(username) {
 }
 
 function findUserById(id) {
-   return db('users').where({ id: id })
+   console.log("user_id", id)
+   return db('users').where({ id: id }).select("username")
 }

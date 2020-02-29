@@ -1,6 +1,7 @@
 const db = require('../database/dbConfig')
 
 module.exports = {
+  allHowtos,
    addHowto,
    addStep,
    updateHowto,
@@ -15,9 +16,9 @@ module.exports = {
 
 //howtos
 
-function addHowto(user) {
-   return db('howtos')
-    .insert(user)
+function addHowto(body) {
+  return db('howtos')
+    .insert(body)
 }
 
 function updateHowto(id, body){
@@ -26,14 +27,19 @@ function updateHowto(id, body){
     .update(body)
 }
 
-function deleteHowto(id){
+function deleteHowto(id, del){
   return db('howtos')
     .where({id: id})
-    .del()
+    .update({active: del})
+}
+
+function allHowtos() {
+  return db(`howtos`).where({active: 1})
 }
 
 function findHowtoBy(id) {
-   return db('howtos').where({id: id})
+  console.log(id)
+  return db('howtos').where({id: id, active: 1})
 }
 
 //steps
@@ -56,5 +62,5 @@ function deleteStep(id){
 }
 
 function findStepBy(id) {
-  return db('steps').where({id: id})
+  return db('steps').where({howto_id: id})
 }
