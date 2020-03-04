@@ -4,35 +4,7 @@ const howtoDB = require('../howto/howto-model')
 
 const authenticate = require('../auth/authenticate')
 
-//return howto, join username, and steps
-  // example return
-  // res.status(200).json({
-  //   id: 1,
-  //   user_id: 2,
-  //   username: "brian",
-  //   name: "How To Swap Your Automatic For a Manual",
-  //   description: "1998-2003 TDI VW Beetle Automatic to Manual Swap guide",
-  //   active: 1,
-  //   steps: [
-  //     {
-  //       id: 1,
-  //       howto_id: 1,
-  //       name: "Take Air Box Out",
-  //       description: "Remove hose clamp, and both bolts holding the air box out, unplug mass airflow sensor, and vacuum release hose.",
-  //       active: 1,
-  //       step_number: 1
-  //     },
-  //     {
-  //       id: 2,
-  //       howto_id: 1,
-  //       name: "Remove battery and tray",
-  //       description: "Remove cover from battery,\nRemove negative battery cable first, then the positive\nRemove headlight cover\nRemove battery hold down\nRemove battery\nRemove four screws holding battery tray to chassis\nRemove tray",
-  //       active: 1,
-  //       step_number: 2
-  //     }
-  //   ]
-  // })
-
+//list of howtos, no details
 router.get('/', (req, res) => {
   howtoDB.allHowtos()
     .then(howtos => {
@@ -43,40 +15,61 @@ router.get('/', (req, res) => {
     })
 })
 
+//list of howtos with details
 router.get('/:id', howtoIdExists, attachUsername, attachSteps, (req, res) => {
   //console.log(req.data)
   res.status(200).json(req.data)
 })
 
+//post a new howto, must be logged in
+//checkHowtoBody checks if user_id as a number, name, description as string, and sets active: 1
 router.post('/', authenticate, checkHowtoBody, (req, res) => {
-  res.status(200).json({...req.body})
+  // res.status(200).json({...req.body})
+   howtoDB.addHowto(req.data)
+          .then(inserted => {
+            console.log(inserted)
+            res.status(200).json({submitted_data: req.data, data: inserted})
+          })
+          .catch(error => {
+            res.status(404).json({error: error, message: "database rejected update"})
+          })
 })
 
-router.post('/:id/steps', authenticate, (req, res) => {
+//post a new step, must be logged in
+router.post('/:id/step', authenticate, (req, res) => {
   res.status(200).json({message:req.body, post_id:req.params.id})
 })
 
-router.put('/:id/steps', authenticate, (req, res) => {
-  res.status(200).json({message:req.body, post_id:req.params.id})
-})
-
-router.delete('/:id/steps', authenticate, (req, res) => {
-  res.status(200).json({deleted_step: req.params.id})
-})
-
-router.post('/:id', authenticate, (req, res) => {
-  res.status(200).json({message:req.body, post_id:req.params.id})
-})
-
+//update a howto, must be logged in
+//checkHowtoBody checks if user_id as a number, name, description as string, and sets active: 1
 router.put('/:id', authenticate, howtoIdExists, checkHowtoBody, (req, res) => {
-  res.status(200).json({message:req.body, post_id:req.params.id})
+  // res.status(200).json({message:req.body, post_id:req.params.id})
+   howtodb.updateHowto(req.params.id, req.data)
+          .then(updated => {
+            console.log(updated)
+            res.status(200).json({updated_howto: req.params.id, submitted_data:req.data, data:updated})
+          })
+          .catch(error => {
+            res.status(404).json({error: error, message: "database rejected update"})
+          })
 })
 
+//delete a howto, must be logged in
 router.delete('/:id', authenticate, howtoIdExists, DeleteIt, (req, res) => {
   howtoDB.deleteHowto(req.params.id, req.data.active)
     .then(result => {
       res.status(200).json({deleted_howto:req.data, result: result})
     })
+})
+
+//edit a step, must be logged in
+router.put('/step/:id', authenticate, (req, res) => {
+  res.status(200).json({message:req.body, post_id:req.params.id})
+})
+
+//delete a step, must be logged in
+router.delete('/step/:id', authenticate, (req, res) => {
+  res.status(200).json({deleted_step: req.params.id})
 })
 
 //middleware
@@ -91,6 +84,8 @@ function checkHowtoBody(req,res,next) {
       console.log("name is a string")
       if(typeof(req.body.description) === "string"){
         console.log("description is a string")
+        req.data = req.body
+        req.data = {...req.data, active: 1}
         next()
       }else{
         res.status(401).json({error: "description must be a string"})  
