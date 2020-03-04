@@ -2,6 +2,8 @@ const router = require('express').Router()
 const userDB = require('../auth/users-model')
 const howtoDB = require('../howto/howto-model')
 
+const authenticate = require('../auth/authenticate')
+
 //return howto, join username, and steps
   // example return
   // res.status(200).json({
@@ -46,31 +48,31 @@ router.get('/:id', howtoIdExists, attachUsername, attachSteps, (req, res) => {
   res.status(200).json(req.data)
 })
 
-router.post('/', checkHowtoBody, (req, res) => {
-  res.status(200).json({message:req.body})
+router.post('/', authenticate, checkHowtoBody, (req, res) => {
+  res.status(200).json({...req.body})
 })
 
-router.post('/:id/steps', (req, res) => {
+router.post('/:id/steps', authenticate, (req, res) => {
   res.status(200).json({message:req.body, post_id:req.params.id})
 })
 
-router.put('/:id/steps', (req, res) => {
+router.put('/:id/steps', authenticate, (req, res) => {
   res.status(200).json({message:req.body, post_id:req.params.id})
 })
 
-router.delete('/:id/steps', (req, res) => {
+router.delete('/:id/steps', authenticate, (req, res) => {
   res.status(200).json({deleted_step: req.params.id})
 })
 
-router.post('/:id', (req, res) => {
+router.post('/:id', authenticate, (req, res) => {
   res.status(200).json({message:req.body, post_id:req.params.id})
 })
 
-router.put('/:id', (req, res) => {
+router.put('/:id', authenticate, howtoIdExists, checkHowtoBody, (req, res) => {
   res.status(200).json({message:req.body, post_id:req.params.id})
 })
 
-router.delete('/:id', howtoIdExists, DeleteIt, (req, res) => {
+router.delete('/:id', authenticate, howtoIdExists, DeleteIt, (req, res) => {
   howtoDB.deleteHowto(req.params.id, req.data.active)
     .then(result => {
       res.status(200).json({deleted_howto:req.data, result: result})
@@ -80,6 +82,7 @@ router.delete('/:id', howtoIdExists, DeleteIt, (req, res) => {
 //middleware
 
 function checkHowtoBody(req,res,next) {
+  console.log(req.data)
   console.log(typeof(req.body.user_id))
   //check to see if user_id is a number  
   if(typeof(req.body.user_id) === "number"){
@@ -88,7 +91,6 @@ function checkHowtoBody(req,res,next) {
       console.log("name is a string")
       if(typeof(req.body.description) === "string"){
         console.log("description is a string")
-        req.data={...req.data, active: 1}
         next()
       }else{
         res.status(401).json({error: "description must be a string"})  
@@ -146,14 +148,6 @@ function howtoIdExists(req, res, next) {
     .catch( error => {
       res.status(500).json({message: "database connection error", error: error})
     })
-}
-
-function intToBoolean(int) {
-  return int === 1 ? true : false;
-}
-
-function booleanToint(bool) {
-  return bool === true ? 1 : 0;
 }
 
 module.exports = router
