@@ -28,7 +28,8 @@ router.post('/', authenticate, checkHowtoBody, (req, res) => {
    howtoDB.addHowto(req.data)
           .then(inserted => {
             console.log(inserted)
-            res.status(200).json({submitted_data: req.data, data: inserted})
+            id = inserted[0]
+            res.status(200).json({data: {...req.data, id: id}})
           })
           .catch(error => {
             res.status(404).json({error: error, message: "database rejected update"})
@@ -42,12 +43,13 @@ router.post('/:id/step', authenticate, (req, res) => {
 
 //update a howto, must be logged in
 //checkHowtoBody checks if user_id as a number, name, description as string, and sets active: 1
-router.put('/:id', authenticate, howtoIdExists, checkHowtoBody, (req, res) => {
-  // res.status(200).json({message:req.body, post_id:req.params.id})
-   howtodb.updateHowto(req.params.id, req.data)
+router.put('/:id', authenticate, howtoIdExists, checkHowtoBody, authorizeUserHowto, (req, res) => {
+   //res.status(200).json({message:req.body, modified:req.data, post_id:req.params.id})
+   howtoDB.updateHowto(req.params.id, req.data)
           .then(updated => {
             console.log(updated)
-            res.status(200).json({updated_howto: req.params.id, submitted_data:req.data, data:updated})
+            id = updated[0]
+            res.status(200).json({data: {...req.data, id: id}})
           })
           .catch(error => {
             res.status(404).json({error: error, message: "database rejected update"})
@@ -74,16 +76,33 @@ router.delete('/step/:id', authenticate, (req, res) => {
 
 //middleware
 
+function authorizeUserHowto(req,res,next){
+  //console.log(req.data.user_id)
+  //check to see if req.data.user_id is the same as on the howtos table at req.params.id
+  howtoDB.findHowtoBy(req.params.id)
+          .then(howto => {
+            if(req.data.user_id == howto[0].user_id){
+              next()
+            }
+            else {
+              res.status(403).json({error: error, message: "AuthZ rejected request at authorizeUser middleware. Rejected because user_id mismatch, user is not authorized to make a change to this record"})
+            }
+          })
+          .catch(error => {
+            res.status(404).json({error: error, message: "database rejected request at authorizeUser middleware"})
+          })
+}
+
 function checkHowtoBody(req,res,next) {
-  console.log(req.data)
-  console.log(typeof(req.body.user_id))
+  //console.log(req.data)
+  //console.log(typeof(req.body.user_id))
   //check to see if user_id is a number  
   if(typeof(req.body.user_id) === "number"){
-    console.log("user_id is a number")
+    //console.log("user_id is a number")
     if(typeof(req.body.name) === "string"){
-      console.log("name is a string")
+      //console.log("name is a string")
       if(typeof(req.body.description) === "string"){
-        console.log("description is a string")
+        //console.log("description is a string")
         req.data = req.body
         req.data = {...req.data, active: 1}
         next()
@@ -101,7 +120,7 @@ function checkHowtoBody(req,res,next) {
 function attachSteps(req,res,next) {
   howtoDB.findStepBy(req.data.id)
   .then(steps => {
-    console.log(steps)
+    //console.log(steps)
     req.data = {...req.data, steps: steps}
   })
   .catch(error => {
@@ -115,7 +134,7 @@ function attachSteps(req,res,next) {
 function attachUsername(req,res,next) {
   userDB.findUserById(req.data.user_id)
     .then(name => {
-      console.log("username", name[0].username)
+      //console.log("username", name[0].username)
       req.data = {...req.data, username: name[0].username}
     })
     .catch(error => {
