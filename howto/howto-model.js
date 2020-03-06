@@ -30,7 +30,7 @@ function updateHowto(id, body){
 function deleteHowto(id, del){
   return db('howtos')
     .where({id: id})
-    .update({active: del})
+    .update(del)
 }
 
 function allHowtos() {
@@ -38,15 +38,15 @@ function allHowtos() {
 }
 
 function findHowtoBy(id) {
-  console.log(id)
-  return db('howtos').where({id: id, active: 1})
+  //console.log(id)
+  return db('howtos').where({id: id, active: 1}).first()
 }
 
 //steps
 
-function addStep(user) {
+function addStep(step) {
   return db('steps')
-   .insert(user)
+   .insert(setp)
 }
 
 function updateStep(id, body){

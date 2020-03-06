@@ -1,14 +1,16 @@
 const jwt = require('jsonwebtoken')
 
 module.exports = (req, res, next) => {
-  const token = req.headers.authorization
+  const authorization = req.headers.authorization
   const secret = "Mai-ia-hii Mai-ia-huu Mai-ia-haa Mai-ia-ha ha"
-  if (token) {
-    jwt.verify(token, secret, (err, token) => {
+  
+  if (authorization) {
+    jwt.verify(authorization, secret, (err, token) => {
       if (err) {
         res.status(401).json({ you: 'shall not pass!' })
       } else {
-        req.token = token
+        req.user_info = token
+        console.log("authenticate")
         next()
       }
     })
